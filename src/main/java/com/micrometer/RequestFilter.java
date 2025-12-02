@@ -18,6 +18,9 @@ public class RequestFilter implements Filter {
         this.context = context;
     }
 
+    //put this in an empty project and throw execution from here and controller on different threads
+    //see how the framework handles executions and context updates across threads
+
     @Override
     public void doFilter(ServletRequest req, ServletResponse res, FilterChain chain)
             throws IOException, ServletException {
