@@ -1,4 +1,5 @@
 <configuration>
+<!--    i dont think i can just change our logs to json but I can ask splunk people-->
     <appender name="JSON" class="ch.qos.logback.core.ConsoleAppender">
         <encoder class="ch.qos.logback.contrib.json.classic.JsonLayout">
             <jsonFormatter class="ch.qos.logback.contrib.jackson.JacksonJsonFormatter"/>
