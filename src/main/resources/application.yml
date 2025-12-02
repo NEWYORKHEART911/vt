@@ -4,3 +4,15 @@ spring:
     username: postgres
     password: newyorkheart911
     driver-class-name: org.postgresql.Driver
+  #Spring MVC + RestControllers + @Async + WebClient will all run on virtual threads automatically.
+  threads:
+    virtual:
+      enabled: true  #Java configuration is preferred
+  #Micrometer Tracing (OTEL bridge) automatically maps baggage keys into MDC.
+management:
+  tracing:
+    baggage:
+      enabled: true
+      correlation:
+        fields: userId,adminId,tenantId
+
