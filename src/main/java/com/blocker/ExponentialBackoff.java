@@ -7,6 +7,15 @@ public class ExponentialBackoff {
     //This version mirrors Striped64 (LongAdder internal class):
     //this is the best
 
+    //what it accomplishes:
+//    Key points:
+//    exponential spin backoff (1 → 2 → 4 → 8 → …)
+//    capped at a threshold
+//    escalates into minimal parking
+//    avoids hogging CPU but still makes progress
+//    reduces CAS collision rate
+//    This produces excellent stability in high contention.
+
     long v;
     int spins = 1;
 
