@@ -35,6 +35,9 @@ public class ExponentialBackoff {
             //One iteration costs some number of CPU cycles (call it C)
 //            If the CPU runs at frequency F Hz, then time per iteration ≈ C / F seconds.
 //             So iterations per second ≈ F / C.
+
+//            For spins = S, cycles per iter = C, CPU freq = F (Hz):
+//            time_seconds = (S * C) / F
             if (spins < 512) {                 // cap spin
                 spins <<= 1;                   // exponential backoff
             } else {
