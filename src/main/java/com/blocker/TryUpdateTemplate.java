@@ -31,7 +31,7 @@ public class TryUpdateTemplate {
             }
 
             // medium backoff
-            Thread.yield();  //cpu hint - need to refresh exactly how it works
+            Thread.yield();  //cpu hint - need to research exactly how it works
 
             //beyond this point the strategy will involve doing anything to avoid catastrophic failure
             //need to know memory constraints/CPU constraints
