@@ -1,0 +1,7 @@
+Focus on reducing failed CASs (use cells, or a small semaphore gate) —
+because actual contention costs are usually in the CAS and cache-coherence stalls,
+not the spin loop itself.
+
+Use Thread.onSpinWait() (as you already do) — it helps on modern CPUs.
+
+Benchmark on your target hardware (JMH) — that will tell you the real numbers you care about.
