@@ -5,11 +5,15 @@ import com.utils.Tl;
 import org.springframework.stereotype.Component;
 
 import java.util.concurrent.*;
+import java.util.concurrent.locks.StampedLock;
 
 @Component
 public class LoggingContextVirtualExecutorImpl implements LoggingAwareExecutor {
 
     private final ExecutorService virtualExecutor = Executors.newVirtualThreadPerTaskExecutor();
+
+    Phaser phaser = new Phaser();
+    StampedLock lock = new StampedLock();
 
     @Override
     public void execute(Runnable task) {
