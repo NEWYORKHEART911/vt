@@ -30,6 +30,7 @@ public class ExponentialBackoff {
                 Thread.onSpinWait();           // JDK 9+ CPU hint
             }
 
+            //test how long it takes to reach this limit ****
             if (spins < 512) {                 // cap spin
                 spins <<= 1;                   // exponential backoff
             } else {
