@@ -31,6 +31,9 @@ public class ExponentialBackoff {
             }
 
             //test how long it takes to reach this limit ****
+            //chat GPT :
+//            If the CPU runs at frequency F Hz, then time per iteration ≈ C / F seconds.
+//             So iterations per second ≈ F / C.
             if (spins < 512) {                 // cap spin
                 spins <<= 1;                   // exponential backoff
             } else {
