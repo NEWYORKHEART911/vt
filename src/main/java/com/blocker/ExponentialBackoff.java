@@ -1,5 +1,6 @@
 package com.blocker;
 
+import java.util.concurrent.atomic.AtomicStampedReference;
 import java.util.concurrent.locks.LockSupport;
 
 public class ExponentialBackoff {
@@ -16,25 +17,28 @@ public class ExponentialBackoff {
 //    reduces CAS collision rate
 //    This produces excellent stability in high contention.
 
-    long v;
-    int spins = 1;
+    public void backoff() {
+        long v;
+        int spins = 1;
 
-    //AtomicStampedReference
-    while (!atomic.compareAndSet(prev, next)) {
+        //AtomicStampedReference
+        AtomicStampedReference<Object> atomicRef = new AtomicStampedReference<>(new Object(), 0);
+        while (!atomicRef.compareAndSet(new Object(), new Object(), 0, 0)) {
 
-        // Phase 1: spin with exponential backoff
-        for (int i = 0; i < spins; i++) {
-            Thread.onSpinWait();           // JDK 9+ CPU hint
+            // Phase 1: spin with exponential backoff
+            for (int i = 0; i < spins; i++) {
+                Thread.onSpinWait();           // JDK 9+ CPU hint
+            }
+
+            if (spins < 512) {                 // cap spin
+                spins <<= 1;                   // exponential backoff
+            } else {
+                // Phase 2: park minimal nanos
+                LockSupport.parkNanos(1);
+            }
+
+            // Phase 3: potential fallback here
         }
-
-        if (spins < 512) {                 // cap spin
-            spins <<= 1;                   // exponential backoff
-        } else {
-            // Phase 2: park minimal nanos
-            LockSupport.parkNanos(1);
-        }
-
-        // Phase 3: potential fallback here
     }
 
 

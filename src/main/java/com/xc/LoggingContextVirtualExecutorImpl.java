@@ -13,7 +13,7 @@ public class LoggingContextVirtualExecutorImpl implements LoggingAwareExecutor {
     private final ExecutorService virtualExecutor = Executors.newVirtualThreadPerTaskExecutor();
 
     Phaser phaser = new Phaser();
-    StampedLock lock = new StampedLock();
+    StampedLock lock = new StampedLock();  //dont use this
 
     @Override
     public void execute(Runnable task) {

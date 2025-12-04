@@ -1,0 +1,14 @@
+1. Start with cheap CAS spins
+Good when contention is light.
+
+2. Exponential spin backoff
+Reduces CAS collisions.
+
+3. Yield
+Relinquishes CPU when your CAS isn’t going to win.
+
+4. Minimal parking
+Removes CPU burn under heavy contention.
+
+5. Fallback path
+Prevent starvation and ensure eventual progress.
