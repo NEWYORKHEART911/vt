@@ -38,6 +38,9 @@ public class ExponentialBackoff {
 
 //            For spins = S, cycles per iter = C, CPU freq = F (Hz):
 //            time_seconds = (S * C) / F
+
+//            So even 512 spins on a 3GHz CPU is on the order of tens to a few hundred nanoseconds in the inner spin loop (not counting CAS attempts and other overhead).
+//            If you choose C = 20 on the same CPU, 512 spins ≈ 341 ns. If the CPU is slower (2.5 GHz) times get proportionally larger.
             if (spins < 512) {                 // cap spin
                 spins <<= 1;                   // exponential backoff
             } else {
