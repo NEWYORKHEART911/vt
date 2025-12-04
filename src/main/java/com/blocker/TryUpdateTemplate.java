@@ -35,7 +35,8 @@ public class TryUpdateTemplate {
 
             //beyond this point the strategy will involve doing anything to avoid catastrophic failure
             //need to know memory constraints/CPU constraints
-            //expected load should be a few factors under what the maximum we can handle is
+            //expected maximum of logging system load should be a few factors
+            // under what the maximum the application as a whole can handle is
 
             // heavy backoff
             LockSupport.parkNanos(1);
