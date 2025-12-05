@@ -1,7 +1,11 @@
 package com.utils;
 
+import org.springframework.web.context.request.RequestScope;
+
 public class LoggingContext {
 
+    //adds scope - in hindsight that makes a lot of sense
+    RequestScope scope;
     public String var1;
     public String var2;
 
@@ -19,6 +23,13 @@ public class LoggingContext {
 
     public String getVar1() {
         return var1;
+    }
+
+    public void setScope(RequestScope scope) {
+        this.scope = scope;
+    }
+    public RequestScope getScope() {
+        return this.scope;
     }
 
 }

@@ -3,6 +3,7 @@ package com.xc;
 import com.utils.LoggingContext;
 import com.utils.Tl;
 import org.springframework.stereotype.Component;
+import org.springframework.web.context.request.RequestScope;
 
 import java.util.concurrent.*;
 import java.util.concurrent.locks.StampedLock;
@@ -18,6 +19,8 @@ public class LoggingContextVirtualExecutorImpl implements LoggingAwareExecutor {
     @Override
     public void execute(Runnable task) {
         LoggingContext context = Tl.getContext();
+        //add RequestScope
+        RequestScope scope = context != null ? context.getScope() : null;
 
         virtualExecutor.execute(() -> {
             try {

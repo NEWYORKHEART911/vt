@@ -1,0 +1,167 @@
+Additional Safeguards
+1- make everything final :
+-contextawareexecutor
+-RequestContext
+-RequestWorkTracker
+2- Spring Boot Starter Auto-Configuration (register in front of spring security filter - around -102 order)
+========================
+@Configuration
+@AutoConfigureOrder(Ordered.HIGHEST_PRECEDENCE)
+public class RequestContextAutoConfiguration {
+
+    @Bean
+    public FilterRegistrationBean<LoggingFilter> loggingFilter() {
+        FilterRegistrationBean<LoggingFilter> registration = new FilterRegistrationBean<>();
+        registration.setFilter(new LoggingFilter());
+        registration.setOrder(Ordered.HIGHEST_PRECEDENCE);
+        return registration;
+    }
+
+    @Bean
+    public ContextAwareExecutor contextAwareExecutor() {
+        return new ContextAwareExecutor();
+    }
+}
+===========================
+
+// ===== LIBRARY CODE (untouchable by developers) =====
+
+public final class RequestWorkTracker {
+    private final Phaser phaser;
+    private final AtomicBoolean completed = new AtomicBoolean(false);
+
+    // Package-private - only library code can create
+    RequestWorkTracker() {
+        this.phaser = new Phaser(1);
+    }
+
+    // Package-private - only ContextAwareExecutor can call
+    void registerTask() {
+        if (completed.get()) {
+            throw new IllegalStateException(
+                "BUG: Attempted to register task after request completed. " +
+                "This should be impossible - contact platform team."
+            );
+        }
+        phaser.register();
+    }
+
+    // Package-private - only ContextAwareExecutor can call
+    void completeTask() {
+        phaser.arriveAndDeregister();
+    }
+
+    // Package-private - only LoggingFilter can call
+    void awaitCompletion() {
+        if (!completed.compareAndSet(false, true)) {
+            throw new IllegalStateException(
+                "BUG: awaitCompletion called twice. " +
+                "This should be impossible - contact platform team."
+            );
+        }
+
+        if (phaser.isTerminated()) {
+            // This means arrivals went negative somehow
+            throw new IllegalStateException(
+                "BUG: Phaser terminated before filter completion. " +
+                "Likely cause: completeTask() called more times than registerTask(). " +
+                "Check for duplicate finally blocks or manual phaser manipulation."
+            );
+        }
+
+        phaser.arriveAndAwaitAdvance();
+    }
+}
+
+public final class RequestContext {
+    private final LoggingContext loggingContext;
+    private final RequestWorkTracker workTracker;
+
+    // Package-private constructor
+    RequestContext(LoggingContext ctx) {
+        this.loggingContext = ctx;
+        this.workTracker = new RequestWorkTracker();
+    }
+
+    public LoggingContext getLoggingContext() {
+        return loggingContext;
+    }
+
+    // NO PUBLIC ACCESS TO WORK TRACKER!
+    // Only library code can get it
+    RequestWorkTracker getWorkTracker() {
+        return workTracker;
+    }
+}
+
+public final class RequestContextHolder {
+    private static final ThreadLocal<RequestContext> TL = new ThreadLocal<>();
+
+    // Package-private - only library can set
+    static void set(RequestContext rc) {
+        TL.set(rc);
+    }
+
+    // Public - developers can read
+    public static RequestContext get() {
+        return TL.get();
+    }
+
+    // Package-private - only library can clear
+    static void clear() {
+        TL.remove();
+    }
+}
+
+public final class ContextAwareExecutor {
+    private final ExecutorService executor = Executors.newVirtualThreadPerTaskExecutor();
+
+    // PUBLIC API - developers call this
+    public void runAsync(Runnable task) {
+        RequestContext rc = RequestContextHolder.get();
+        if (rc == null) {
+            executor.execute(task);
+            return;
+        }
+
+        RequestWorkTracker tracker = rc.getWorkTracker(); // Package access
+        tracker.registerTask(); // Package access
+
+        executor.execute(() -> {
+            RequestContextHolder.set(rc); // Would need to be package-accessible
+            try {
+                task.run();
+            } catch (Exception e) {
+                // Log but don't rethrow - async task failures shouldn't break tracker
+                log.error("Async task failed", e);
+            } finally {
+                try {
+                    tracker.completeTask(); // Package access
+                } finally {
+                    RequestContextHolder.clear(); // Package access
+                }
+            }
+        });
+    }
+}
+
+// Package-private filter - auto-registered by Spring Boot starter
+final class LoggingFilter implements Filter {
+    @Override
+    public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
+            throws IOException, ServletException {
+        LoggingContext context = extractLoggingContext(request);
+        RequestContext rc = new RequestContext(context);
+        RequestContextHolder.set(rc);
+
+        try {
+            chain.doFilter(request, response);
+        } finally {
+            try {
+                rc.getWorkTracker().awaitCompletion();
+            } finally {
+                RequestContextHolder.clear();
+            }
+        }
+    }
+}
