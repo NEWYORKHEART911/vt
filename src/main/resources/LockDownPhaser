@@ -4,6 +4,7 @@ Additional Safeguards
 -RequestContext
 -RequestWorkTracker
 2- Spring Boot Starter Auto-Configuration (register in front of spring security filter - around -102 order)
+3- add phaser.isTerminated() check before .arriveAndAwaitAdvance(), checks < 0
 ========================
 @Configuration
 @AutoConfigureOrder(Ordered.HIGHEST_PRECEDENCE)
