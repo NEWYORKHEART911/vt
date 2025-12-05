@@ -12,6 +12,8 @@ public final class LoggingVirtualThreadExecutor implements ContextAwareExecutor 
     private final ExecutorService delegate =
             Executors.newThreadPerTaskExecutor(Thread.ofVirtual().factory());
 
+    //because context is ThreadLocal this should technically work for passing context
+    //but not for capturing request scope and ending transaction aggressively
     @Override
     public void execute(Runnable task) {
         var ctx = LoggingContext.capture(); // your immutable snapshot
