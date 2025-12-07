@@ -12,9 +12,4 @@ public class Main {
         SpringApplication.run(Main.class, args);
     }
 
-    @Bean
-    public ContextAwareExecutor contextAwareExecutor() {
-        return new LoggingVirtualThreadExecutor();
-    }
-
 }

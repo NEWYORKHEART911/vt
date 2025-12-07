@@ -41,7 +41,7 @@ public class LoggingContextVirtualExecutor {
         System.out.println(virtualExecutor.getClass());
 
         virtualExecutor.execute(() -> {  //begin new virtual thread
-            System.out.println("begin new VT = [" + Thread.currentThread() + "]");
+            System.out.println("begin new VT = [" + Thread.currentThread().getStackTrace()[2] + "]");
             System.out.println("in3");  //before in2
             try {
                 if(context != null) {
