@@ -15,7 +15,7 @@ public final class ContextAwareTaskScope<T> extends StructuredTaskScope<T> {
     public <U extends T> Subtask<U> fork(Callable<? extends U> task) {
         TransactionContext snapshot = parentContext.copy();  //use ScopedValue -> .get() reference
 
-        return super.fork(() -> {
+        return super.fork(() -> { //have to check what depth this is
             // Restore context for this virtual thread
             ContextHolder.set(snapshot);
             try {
