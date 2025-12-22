@@ -7,6 +7,8 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.io.IOException;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Callable;
@@ -90,6 +92,8 @@ public class Controller implements TaskBatch {
             }
         });
 
+        //*** Best practice: Handle retries inside each task, before it completes.
+
         // Wait for all to complete (or first failure)
             scope.join();
             scope.throwIfFailed();
@@ -108,6 +112,26 @@ public class Controller implements TaskBatch {
             throw new RuntimeException(e);
         }
 
+    }
+
+    //example of retry based on certain exceptions (maybe usable concept)
+    public static <T> T returnOnTransientFailure(
+            Callable<T> task,
+            int maxRetries
+    ) throws Exception {
+        Exception lastException = null;
+
+        for(int attempt = 0; attempt <= maxRetries; attempt++ ) {
+            try {
+                return task.call();
+            } catch(SQLException | IOException e) {
+                lastException = e;
+                if(attempt < maxRetries) {
+                    Thread.sleep(100 * (attempt + 1));
+                }
+            }
+        }
+        throw lastException;
     }
 
     private String returnFour(Number number) {
