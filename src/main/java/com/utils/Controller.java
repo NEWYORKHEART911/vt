@@ -1,67 +1,114 @@
 package com.utils;
 
+import com.methodcall.RecordValidatorImpl;
+import com.task.TaskBatch;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.StructuredTaskScope;
+import java.util.function.Consumer;
+import java.util.function.Function;
+
 @RestController
 @RequestMapping("/test")
-public class Controller {
+public class Controller implements TaskBatch {
+
+    RecordValidatorImpl validator = new RecordValidatorImpl();
 
     @PostMapping("/2")
-    public String y() throws InterruptedException {
-        System.out.println("original t name=" + Thread.currentThread().getName());
-        Tl.setContext(new LoggingContext());
-        LoggingContext contextInit = Tl.getContext();  //its same because of threadlocal
-        contextInit.setVar1("17");
-        contextInit.setVar2("23");
-        LoggingContextVirtualExecutor.getInstance().execute(() -> {
-            System.out.println("in2");
-            System.out.println("t name=" + Thread.currentThread());  //where is my thread name?
-            System.out.println(Tl.getContext().getVar1());
+    public String y() throws InterruptedException, Exception {
+        //Consumer allows us to submit multiple entries before execution
+        //so thats why Consumer is good here - use .accept
+
+        Number.FourImpl four = new Number.FourImpl("item1");
+        Number.FiveImpl five = new Number.FiveImpl("five");
+
+        //Java needs a way to refer to a method without calling it, and ClassName::methodName
+        //:: reference a method without invoking it
+        //for INSTANCE method reference, use this :: method name, makes sense
+        Callable<String> c = bind(this::returnFour, four);  //callable type is the return type
+
+        //i dont think need submit and bind? it does the same thing - bind returns a callable
+        //need for submission as subtask
+
+//        submit(this::returnFour, four);
+
+        run(batch -> {
+            try {
+                batch.submit(this::returnFour, four);
+                batch.submit(this::returnFour, five);
+                batch.submit(this::returnNull, four); //returns null with Void typing
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
         });
-        return "complete";
+
+        return c.call();
     }
 
-//    @PostMapping("/1")
-//    public String x() {
-//        LoggingContext context = Tl.getContext();  //i think its the same problem
-//        //logging context isn't initialized - question is how was it done
-//        //probably at start transaction , still has a fallback tho
-//        Tl.setContext(new LoggingContext());
-//        LoggingContext contextInitialized = Tl.getContext();
-//        contextInitialized.setVar1("14");
-//        contextInitialized.setVar2("21");
-//
-//        //basically just a pooled thread
-//        //executor.submit() does not immediately run task on current thread
-//        //it schedules it for execution by the ExecutorService
-//        executor.submit(() -> {
-//            //** the most sensible solution is one where
-//            //the logging dependency must be used to create the executor
-//            //which automatically manages the logging aspect
-//            //otherwise cannot use virtual threads
-//            //** could create code that breaks vt unless used by logging dep.
-//            //think thats the only way to avoid people fucking it up
-//
-//            //virtual threads don't use thread pools - guess b/c different type of thread
-//            threadlocal.set(contextInitialized);
-//            //one thing to watch for would be disappearing logging context
-//            //if main thread were to finish/return
-//            System.out.println("Second thread: " + Thread.currentThread().getName());
-//            doSomething();
-//        });
-//
-//        //still executes before the submit
-//        System.out.println("before start thread");
-//
-//        return "1";
-//    }
-//
-//    private void doSomething() {
-//        System.out.println("Executing in : " + Thread.currentThread().getName());
-//        LoggingContext context2 = Tl.getContext();
-//        System.out.println("context2 = " + context2.getVar1());
+//    @Override
+//    public <R extends Record, T> void submit(Function<R, T> method, R record) throws Exception {
+//        T result = method.apply(record);
+//        System.out.println("Result= " + result);
 //    }
 
+    //must add <T> before void to add to TaskBatch - WHY DOES IT WORK LIKE THIS?!~?!
+    //the method itself needs to declare the generic type parameter T so it can be
+    //used in the method signature - so this is just another java thing
+    //so basically putting generic in method signature like this is what DECLARES the generic
+    //method level generics
+    //Declared before the return type - only available to that method:
+    public static <T> List<T> run(Consumer<TaskBatch<T>> definition) throws Exception {
+        //so no i need to return the class Type
+        //need interface to map sealed interface -> class field
+
+        final var subtasks = new ArrayList<StructuredTaskScope.Subtask<T>>();  //make this T
+
+        try (var scope = new StructuredTaskScope.ShutdownOnFailure()) {
+
+            //this is fine to keep the method static
+        definition.accept(new TaskBatch<T>() { //so im defining a new class under hood even tho same name
+            @Override //must override because generics
+            public <R extends Record> void submit(Function<R, T> method, R record) {
+                //validator.validate(record);  //not needed because Record passes through this
+                subtasks.add(scope.fork(() -> method.apply(record)));
+            }
+        });
+
+        // Wait for all to complete (or first failure)
+            scope.join();
+            scope.throwIfFailed();
+
+            return subtasks.stream().map(StructuredTaskScope.Subtask::get).toList();
+
+        } catch (InterruptedException | ExecutionException e) {
+            throw new RuntimeException(e);
+        }
+
+    }
+
+    private String returnFour(Number number) {
+        return number.item();  //just put the field name to get the value with record
+    }
+
+    private Void returnNull(Number number) {
+        return null;
+    }
+
+    public <R extends Record, T> Callable<T> bind(
+            Function<R, T> method,  //where R is the function argument, T is the callable
+            R record
+    ) {
+        return () -> method.apply(record);  //callable
+    }
+
+    @Override
+    public void submit(Function method, Record record) throws Exception {
+
+    }
 }
