@@ -94,6 +94,8 @@ public class Controller implements TaskBatch {
             scope.join();
             scope.throwIfFailed();
 
+            //handle mapping failure - if sealed interface defined right
+            // then it shouldnt even compile but make sure
             for(StructuredTaskScope.Subtask task : subtasks) {
                 if(task.state().equals(StructuredTaskScope.Subtask.State.SUCCESS)) {
                     task.get(); //set to class type - needs the applyTo function
