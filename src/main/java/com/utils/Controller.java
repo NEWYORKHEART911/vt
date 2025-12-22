@@ -144,6 +144,22 @@ public class Controller implements TaskBatch {
             throw new RuntimeException(e);
         }
 
+        //  } catch (ExecutionException e) {
+        //            throw map(e.getCause());
+        //        } catch (InterruptedException e) {
+        //            Thread.currentThread().interrupt();
+        //            throw new RuntimeException(e);
+        //        }
+        //    }
+        //
+        //    private RuntimeException map(Throwable t) {
+        //        // central exception policy
+        //        if (t instanceof RuntimeException re) {
+        //            return re;
+        //        }
+        //        return new RuntimeException(t);
+        //    }
+
     }
 
     // Extract method name
