@@ -69,7 +69,7 @@ public class Controller implements TaskBatch {
     public static <T, P> List<T> run(
 
             Class<P> resultClass,
-            Consumer<TaskBatch<T>> definition
+            Consumer<TaskBatch<T>> taskDefinition
 
     ) throws Exception {
 
@@ -84,7 +84,7 @@ public class Controller implements TaskBatch {
 
             //**the anonymous classis created once per run() call, no per task
             //this is fine to keep the method static
-        definition.accept(new TaskBatch<T>() { //so im defining a new class under hood even tho same name
+        taskDefinition.accept(new TaskBatch<T>() { //so im defining a new class under hood even tho same name
             @Override //must override because generics
             public <R extends Record> void submit(Function<R, T> method, R record) {
                 //validator.validate(record);  //not needed because Record passes through this
