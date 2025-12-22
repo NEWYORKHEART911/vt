@@ -48,7 +48,7 @@ public class Controller implements TaskBatch {
 
 //        submit(this::returnFour, four);
 
-        ResultClass results = run(ResultClass.class, batch -> {
+        ResultClass results = run(ResultClass::new, batch -> {
             batch.submit(this::returnFour, four);
             batch.submit(this::returnFour, five);
             batch.submit(this::returnNull, four); //returns null with Void typing
@@ -71,13 +71,14 @@ public class Controller implements TaskBatch {
     //Declared before the return type - only available to that method:
 //    public static <T, P> List<T> run(
     public static <P, T> P run(
+            //was <P, T> P before changing to Supplier<P> and updating TaskBatch to <P> from <T>
 
             Supplier<P> factory,
             Consumer<TaskBatch<T>> taskDefinition
 
     ) {
 
-        P result = factory.get();  //protection from instantiation failure
+        P result = factory.get();
 
         final var subtasks = new ArrayList<StructuredTaskScope.Subtask<T>>();  //make this T
 
