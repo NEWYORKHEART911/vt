@@ -96,7 +96,11 @@ public class Controller implements TaskBatch {
             @Override //must override because generics
             public <R extends Record> void submit(Function<R, T> method, R record) {
                 //validator.validate(record);  //not needed because Record passes through this
-                subtasks.add(scope.fork(() -> method.apply(record)));
+                subtasks.add(scope.fork(() -> {
+                    //vt doesn't use getName(), pt does
+                    System.out.println("thread: " + Thread.currentThread());
+                    return method.apply(record);
+                }));
             }
         });
 
