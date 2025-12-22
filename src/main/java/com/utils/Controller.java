@@ -63,7 +63,8 @@ public class Controller implements TaskBatch {
     //so basically putting generic in method signature like this is what DECLARES the generic
     //method level generics
     //Declared before the return type - only available to that method:
-    public static <T, P> List<T> run(
+//    public static <T, P> List<T> run(
+    public static <P, T> P run(
 
             Class<P> resultClass,
             Consumer<TaskBatch<T>> taskDefinition
@@ -72,9 +73,9 @@ public class Controller implements TaskBatch {
 
         //so no i need to return the class Type
         //need interface to map sealed interface -> class field
-
+        P result = null;
         try { //need to handle this exception if it cannot be instantiated
-            P result = resultClass.getDeclaredConstructor().newInstance();
+            result = resultClass.getDeclaredConstructor().newInstance();
         } catch (InstantiationException e) {
             throw new RuntimeException(e);
         } catch (IllegalAccessException e) {
@@ -115,7 +116,8 @@ public class Controller implements TaskBatch {
                 }
             }
 
-            return subtasks.stream().map(StructuredTaskScope.Subtask::get).toList();
+            //return subtasks.stream().map(StructuredTaskScope.Subtask::get).toList();
+            return result;
 
         } catch (InterruptedException | ExecutionException e) {
             throw new RuntimeException(e);
