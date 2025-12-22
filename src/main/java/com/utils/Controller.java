@@ -21,6 +21,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.StructuredTaskScope;
 import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 @RestController
@@ -71,25 +72,12 @@ public class Controller implements TaskBatch {
 //    public static <T, P> List<T> run(
     public static <P, T> P run(
 
-            Class<P> resultClass,
+            Supplier<P> factory,
             Consumer<TaskBatch<T>> taskDefinition
 
     ) {
 
-        //so no i need to return the class Type
-        //need interface to map sealed interface -> class field
-        P result = null;
-        try { //need to handle this exception if it cannot be instantiated
-            result = resultClass.getDeclaredConstructor().newInstance();
-        } catch (InstantiationException e) {
-            throw new RuntimeException(e);
-        } catch (IllegalAccessException e) {
-            throw new RuntimeException(e);
-        } catch (InvocationTargetException e) {
-            throw new RuntimeException(e);
-        } catch (NoSuchMethodException e) {
-            throw new RuntimeException(e);
-        }
+        P result = factory.get();  //protection from instantiation failure
 
         final var subtasks = new ArrayList<StructuredTaskScope.Subtask<T>>();  //make this T
 
