@@ -138,6 +138,8 @@ public class Controller implements TaskBatch {
             //return subtasks.stream().map(StructuredTaskScope.Subtask::get).toList();
             return result;
 
+            //need to think about the difference between handling this at the join point
+            //vs doing this at the try boundary
         } catch (InterruptedException | ExecutionException e) {
             throw new RuntimeException(e);
         }
