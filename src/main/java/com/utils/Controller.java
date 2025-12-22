@@ -1,6 +1,7 @@
 package com.utils;
 
 import com.methodcall.RecordValidatorImpl;
+import com.sun.jdi.ClassType;
 import com.task.TaskBatch;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -38,7 +39,7 @@ public class Controller implements TaskBatch {
 
 //        submit(this::returnFour, four);
 
-        run(batch -> {
+        run(ResultClass.class, batch -> {
             try {
                 batch.submit(this::returnFour, four);
                 batch.submit(this::returnFour, five);
@@ -63,9 +64,11 @@ public class Controller implements TaskBatch {
     //so basically putting generic in method signature like this is what DECLARES the generic
     //method level generics
     //Declared before the return type - only available to that method:
-    public static <T> List<T> run(Consumer<TaskBatch<T>> definition) throws Exception {
+    public static <T, P> List<T> run(Class<P> resultClass, Consumer<TaskBatch<T>> definition) throws Exception {
         //so no i need to return the class Type
         //need interface to map sealed interface -> class field
+
+        P result = resultClass.getDeclaredConstructor().newInstance();
 
         final var subtasks = new ArrayList<StructuredTaskScope.Subtask<T>>();  //make this T
 
