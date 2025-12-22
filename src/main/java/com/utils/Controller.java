@@ -80,6 +80,7 @@ public class Controller implements TaskBatch {
 
         try (var scope = new StructuredTaskScope.ShutdownOnFailure()) {
 
+            //**the anonymous classis created once per run() call, no per task
             //this is fine to keep the method static
         definition.accept(new TaskBatch<T>() { //so im defining a new class under hood even tho same name
             @Override //must override because generics
