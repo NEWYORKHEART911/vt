@@ -126,6 +126,8 @@ public class Controller implements TaskBatch {
     }
 
     //example of retry based on certain exceptions (maybe usable concept)
+    //run inside fork for example
+    //scope.fork(() -> { returnOnTransientFailure() }
     public static <T> T returnOnTransientFailure(
             Callable<T> task,
             int maxRetries
