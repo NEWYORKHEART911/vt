@@ -87,6 +87,12 @@ public class Controller implements TaskBatch {
             scope.join();
             scope.throwIfFailed();
 
+            for(StructuredTaskScope.Subtask task : subtasks) {
+                if(task.state().equals(StructuredTaskScope.Subtask.State.SUCCESS)) {
+                    task.get(); //set to class type - needs the applyTo function
+                }
+            }
+
             return subtasks.stream().map(StructuredTaskScope.Subtask::get).toList();
 
         } catch (InterruptedException | ExecutionException e) {
