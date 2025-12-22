@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
@@ -42,13 +43,9 @@ public class Controller implements TaskBatch {
 //        submit(this::returnFour, four);
 
         run(ResultClass.class, batch -> {
-            try {
-                batch.submit(this::returnFour, four);
-                batch.submit(this::returnFour, five);
-                batch.submit(this::returnNull, four); //returns null with Void typing
-            } catch (Exception e) {
-                throw new RuntimeException(e);
-            }
+            batch.submit(this::returnFour, four);
+            batch.submit(this::returnFour, five);
+            batch.submit(this::returnNull, four); //returns null with Void typing
         });
 
         return c.call();
@@ -71,12 +68,22 @@ public class Controller implements TaskBatch {
             Class<P> resultClass,
             Consumer<TaskBatch<T>> taskDefinition
 
-    ) throws Exception {
+    ) {
 
         //so no i need to return the class Type
         //need interface to map sealed interface -> class field
 
-        P result = resultClass.getDeclaredConstructor().newInstance();
+        try { //need to handle this exception if it cannot be instantiated
+            P result = resultClass.getDeclaredConstructor().newInstance();
+        } catch (InstantiationException e) {
+            throw new RuntimeException(e);
+        } catch (IllegalAccessException e) {
+            throw new RuntimeException(e);
+        } catch (InvocationTargetException e) {
+            throw new RuntimeException(e);
+        } catch (NoSuchMethodException e) {
+            throw new RuntimeException(e);
+        }
 
         final var subtasks = new ArrayList<StructuredTaskScope.Subtask<T>>();  //make this T
 
@@ -152,7 +159,7 @@ public class Controller implements TaskBatch {
     }
 
     @Override
-    public void submit(Function method, Record record) throws Exception {
+    public void submit(Function method, Record record)  {
 
     }
 }

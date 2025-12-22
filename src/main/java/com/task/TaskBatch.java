@@ -7,7 +7,7 @@ public interface TaskBatch<T> {
     //** Method-level generics mean “this method is
     // type-polymorphic per invocation, not per instance.”
 
-    <R extends Record> void submit(Function<R, T> method, R record) throws Exception;
+    <R extends Record> void submit(Function<R, T> method, R record);
 
     //If it were written like this:
 
