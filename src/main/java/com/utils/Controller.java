@@ -64,7 +64,13 @@ public class Controller implements TaskBatch {
     //so basically putting generic in method signature like this is what DECLARES the generic
     //method level generics
     //Declared before the return type - only available to that method:
-    public static <T, P> List<T> run(Class<P> resultClass, Consumer<TaskBatch<T>> definition) throws Exception {
+    public static <T, P> List<T> run(
+
+            Class<P> resultClass,
+            Consumer<TaskBatch<T>> definition
+
+    ) throws Exception {
+
         //so no i need to return the class Type
         //need interface to map sealed interface -> class field
 
