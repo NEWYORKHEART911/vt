@@ -42,7 +42,7 @@ public class Controller implements TaskBatch {
 
 //        submit(this::returnFour, four);
 
-        run(ResultClass.class, batch -> {
+        ResultClass results = run(ResultClass.class, batch -> {
             batch.submit(this::returnFour, four);
             batch.submit(this::returnFour, five);
             batch.submit(this::returnNull, four); //returns null with Void typing
