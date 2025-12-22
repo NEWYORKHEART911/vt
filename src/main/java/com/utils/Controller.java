@@ -93,6 +93,7 @@ public class Controller implements TaskBatch {
         });
 
         //*** Best practice: Handle retries inside each task, before it completes.
+            //could try a run with retries AND/OR just return <T> List<T> if voids
 
         // Wait for all to complete (or first failure)
             scope.join();
