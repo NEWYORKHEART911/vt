@@ -140,6 +140,10 @@ public class Controller implements TaskBatch {
 
             //need to think about the difference between handling this at the join point
             //vs doing this at the try boundary
+
+            //this is correct because
+            //join throws ExecutionException
+            //which PERSERVES THE ORIGINAL CAUSE with getCause()
         } catch (InterruptedException | ExecutionException e) {
             throw new RuntimeException(e);
         }
