@@ -2,13 +2,17 @@ package com.utils;
 
 import com.methodcall.RecordValidatorImpl;
 import com.sun.jdi.ClassType;
+import com.task.SerializableFunction;
 import com.task.TaskBatch;
+import com.task.TaskBatchEx;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.io.IOException;
+import java.lang.invoke.SerializedLambda;
 import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
@@ -17,6 +21,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.StructuredTaskScope;
 import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/test")
@@ -93,12 +98,21 @@ public class Controller implements TaskBatch {
             //**the anonymous classis created once per run() call, no per task
             //this is fine to keep the method static
         taskDefinition.accept(new TaskBatch<T>() { //so im defining a new class under hood even tho same name
+           //same batch instance re-uses submit
             @Override //must override because generics
             public <R extends Record> void submit(Function<R, T> method, R record) {
                 //validator.validate(record);  //not needed because Record passes through this
+
+                //String methodName = extractMethodName(method);
+                //with TaskBatchEx, supposedly this would work but its too complex
+                //will have to find another way
+
                 subtasks.add(scope.fork(() -> {
                     //vt doesn't use getName(), pt does
-                    System.out.println("thread: " + Thread.currentThread());
+                    System.out.println("thread: " + Thread.currentThread()
+                            //might need to stream stack trace - stack walker
+                            //how far back should the method be?  2?
+                        + " running task ");
                     return method.apply(record);
                 }));
             }
@@ -128,6 +142,19 @@ public class Controller implements TaskBatch {
         }
 
     }
+
+    // Extract method name
+    private static String extractMethodName(SerializableFunction<?, ?> function) {
+        try {
+            Method writeReplace = function.getClass().getDeclaredMethod("writeReplace");
+            writeReplace.setAccessible(true);
+            SerializedLambda lambda = (SerializedLambda) writeReplace.invoke(function);
+            return lambda.getImplClass() + "::" + lambda.getImplMethodName();
+        } catch (Exception e) {
+            return function.toString();
+        }
+    }
+
 
     //example of retry based on certain exceptions (maybe usable concept)
     //run inside fork for example
