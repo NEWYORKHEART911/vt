@@ -124,7 +124,8 @@ public class Controller implements TaskBatch {
 
         // Wait for all to complete (or first failure)
             scope.join();
-            scope.throwIfFailed();
+            scope.throwIfFailed();  //this is just going to propagate but
+            //it will be wrapped by ExecutionException - i want log and re-throw
 
             //handle mapping failure - if sealed interface defined right
             // then it shouldnt even compile but make sure
