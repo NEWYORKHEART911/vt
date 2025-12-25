@@ -1,0 +1,33 @@
+#It is a compile-time static analysis rule for Error Prone,
+#which is a plugin that hooks into javac.
+
+@BugPattern(
+    summary = "Shared mutable state is forbidden in parallel execution",
+    severity = ERROR
+)
+public class NoSharedStateInParallel extends BugChecker
+    implements VariableTreeMatcher, MethodInvocationTreeMatcher {
+
+    @Override
+    public Description matchVariable(
+        VariableTree tree, VisitorState state) {
+
+        Symbol.VarSymbol sym = ASTHelpers.getSymbol(tree);
+
+        if (sym.isStatic() && !sym.isFinal()) {
+            return buildDescription(tree).build();
+        }
+        return Description.NO_MATCH;
+    }
+}
+
+
+###############
+javac starts
+  ├─ parse source → AST
+  ├─ resolve symbols & types
+  ├─ run Error Prone checks   ← THIS CODE RUNS HERE
+  ├─ report errors
+  └─ emit bytecode (if no errors)
+
+Pure AST + symbol table inspection
