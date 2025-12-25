@@ -1,34 +1,23 @@
 package com.utils;
 
-import com.methodcall.RecordValidatorImpl;
-import com.sun.jdi.ClassType;
-import com.task.SerializableFunction;
-import com.task.TaskBatch;
-import com.task.TaskBatchEx;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.io.IOException;
-import java.lang.invoke.SerializedLambda;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.StructuredTaskScope;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
-import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/test")
 public class Controller implements TaskBatch {
 
-    RecordValidatorImpl validator = new RecordValidatorImpl();
 
     @PostMapping("/2")
     public String y() throws InterruptedException, Exception {
@@ -153,18 +142,6 @@ public class Controller implements TaskBatch {
         //        return new RuntimeException(t);
         //    }
 
-    }
-
-    // Extract method name
-    private static String extractMethodName(SerializableFunction<?, ?> function) {
-        try {
-            Method writeReplace = function.getClass().getDeclaredMethod("writeReplace");
-            writeReplace.setAccessible(true);
-            SerializedLambda lambda = (SerializedLambda) writeReplace.invoke(function);
-            return lambda.getImplClass() + "::" + lambda.getImplMethodName();
-        } catch (Exception e) {
-            return function.toString();
-        }
     }
 
 

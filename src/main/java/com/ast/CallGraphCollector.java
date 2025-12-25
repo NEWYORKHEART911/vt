@@ -8,6 +8,7 @@ import com.sun.source.tree.MethodTree;
 
 public class CallGraphCollector extends BugChecker
         implements BugChecker.MethodTreeMatcher, BugChecker.MethodInvocationTreeMatcher {
+
     @Override
     public Description matchMethodInvocation(MethodInvocationTree methodInvocationTree, VisitorState visitorState) {
         return null;

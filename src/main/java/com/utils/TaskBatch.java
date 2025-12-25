@@ -1,4 +1,4 @@
-package com.task;
+package com.utils;
 
 import java.util.function.Function;
 
