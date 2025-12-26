@@ -1,0 +1,13 @@
+META-INF
+services:
+
+Java’s standard Service Provider Interface (SPI) mechanism.
+
+At compile time, Error Prone does:
+ServiceLoader.load(BugChecker.class)
+
+Which causes the JVM to look for:
+META-INF/services/<interface FQN>
+
+So the lookup path must match exactly:
+META-INF/services/com.google.errorprone.bugpatterns.BugChecker
