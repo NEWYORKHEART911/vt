@@ -31,10 +31,13 @@ public class NoSharedStateInParallel extends BugChecker
     public Description matchVariable(VariableTree tree, VisitorState state) {
         Symbol.VarSymbol sym = ASTHelpers.getSymbol(tree);
 
-        if (sym != null && sym.isStatic() && !sym.isFinal()) {
-            return buildDescription(tree)
-                    .setMessage("Static mutable state is forbidden in parallel code")
-                    .build();
+        if (sym != null && sym.isStatic() && !ASTHelpers.hasAnnotation(sym, "javax.annotation.concurrent.Immutable", state)) {
+            // Check if the variable is NOT final
+            if ((sym.flags() & com.sun.tools.javac.code.Flags.FINAL) == 0) {
+                return buildDescription(tree)
+                        .setMessage("Static mutable state is forbidden in parallel code")
+                        .build();
+            }
         }
 
         return Description.NO_MATCH;
