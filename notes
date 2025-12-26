@@ -11,3 +11,9 @@ META-INF/services/<interface FQN>
 
 So the lookup path must match exactly:
 META-INF/services/com.google.errorprone.bugpatterns.BugChecker
+
+---------------------
+the core idea is create a child module which 'hooks' into the compiler process
+^ need to understand how that works exactly
+
+seems to just need a few dependencies and compilerArgs to enable jdk internal classes to be visible
