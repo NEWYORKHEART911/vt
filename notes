@@ -17,3 +17,16 @@ the core idea is create a child module which 'hooks' into the compiler process
 ^ need to understand how that works exactly
 
 seems to just need a few dependencies and compilerArgs to enable jdk internal classes to be visible
+
+----------------------------
+
+How Error Prone Checkers Work
+The hook happens through several components working together:
+1. Maven Compiler Plugin activates Error Prone
+2. Error Prone Core is made available
+The Fix: Separate Compilation
+Option 1: Disable Error Prone for main sources, enable for test sources
+This way:
+
+Main compilation builds your checker WITHOUT running Error Prone
+Test compilation loads your checker (from target/classes) and runs it on test code
