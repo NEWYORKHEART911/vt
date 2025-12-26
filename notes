@@ -30,3 +30,11 @@ This way:
 
 Main compilation builds your checker WITHOUT running Error Prone
 Test compilation loads your checker (from target/classes) and runs it on test code
+
+
+To answer directly: Yes, it's "just" Maven configuration, but the magic happens through:
+
+-Xplugin:ErrorProne = Activates the plugin
+annotationProcessorPaths = Provides Error Prone's code
+@AutoService + ServiceLoader = Auto-discovers your checker
+Classpath = Your compiled checker must be available when Error Prone runs
