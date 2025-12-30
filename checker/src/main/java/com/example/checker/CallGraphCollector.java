@@ -1,4 +1,4 @@
-package com.ast;
+package com.example.checker;
 
 import com.google.errorprone.VisitorState;
 import com.google.errorprone.bugpatterns.BugChecker;

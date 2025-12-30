@@ -11,6 +11,7 @@
 
   <modules>
     <module>checker</module>
+    <module>app</module>
   </modules>
 
   <parent>

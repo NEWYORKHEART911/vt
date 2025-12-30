@@ -10,15 +10,15 @@
     </parent>
 
     <modelVersion>4.0.0</modelVersion>
-    <artifactId>checker</artifactId>
+    <artifactId>app</artifactId>
 
     <dependencies>
-<!--        <dependency>-->
-<!--            <groupId>com.google.errorprone</groupId>-->
-<!--            <artifactId>error_prone_core</artifactId>-->
-<!--            <version>2.42.0</version>-->
-<!--            <scope>provided</scope>-->
-<!--        </dependency>-->
+        <!--        <dependency>-->
+        <!--            <groupId>com.google.errorprone</groupId>-->
+        <!--            <artifactId>error_prone_core</artifactId>-->
+        <!--            <version>2.42.0</version>-->
+        <!--            <scope>provided</scope>-->
+        <!--        </dependency>-->
 
         <!-- This contains @BugPattern, BugChecker, etc. -->
         <dependency>
@@ -57,7 +57,7 @@
             <scope>provided</scope>
         </dependency>
 
-<!--        from java9-->
+        <!--        from java9-->
         <dependency>
             <groupId>com.google.errorprone</groupId>
             <artifactId>javac</artifactId>
@@ -79,15 +79,15 @@
                     <meminitial>128m</meminitial>
                     <maxmem>1024m</maxmem>
                     <compilerArgs>
-<!--                        enables error prone-->
+                        <!--                        enables error prone-->
                         <arg>-Xplugin:ErrorProne</arg>
-<!--                        disable incremental compilation-->
+                        <!--                        disable incremental compilation-->
                         <arg>-XDcompilePolicy=simple</arg>
-<!--                        allow full analysis-->
+                        <!--                        allow full analysis-->
                         <arg>--should-stop=ifError=FLOW</arg>
 
                         <!-- Required for JDK 17+ -->
-<!--                        -J needed since forking the jvm-->
+                        <!--                        -J needed since forking the jvm-->
 
                         <!-- Add all these exports -->
                         <arg>-J--add-exports=jdk.compiler/com.sun.tools.javac.api=ALL-UNNAMED</arg>
@@ -124,14 +124,13 @@
                     </annotationProcessorPaths>
                 </configuration>
 
-<!--                executions are for main vs test -->
+                <!--                executions are for main vs test -->
                 <executions>
                     <!-- Main source compilation -->
                     <execution>
                         <id>default-compile</id>
                         <configuration>
                             <compilerArgs>
-<!--                                this should go in app defintion-->
                                 <arg>-Xplugin:ErrorProne</arg>
                                 <arg>-XDcompilePolicy=simple</arg>
 
@@ -176,24 +175,24 @@
                 </executions>
             </plugin>
 
-<!--            <plugin>-->
-<!--                <groupId>com.google.errorprone</groupId>-->
-<!--                <artifactId>error-prone-maven-plugin</artifactId>-->
-<!--                <version>0.1</version>-->
-<!--                <executions>-->
-<!--                    <execution>-->
-<!--                        <phase>compile</phase>-->
-<!--                        <goals>-->
-<!--                            <goal>check</goal>-->
-<!--                        </goals>-->
-<!--                    </execution>-->
-<!--                </executions>-->
-<!--                <configuration>-->
-<!--                    <compilerArgs>-->
-<!--                        <arg>-XDcompilePolicy=simple</arg>-->
-<!--                    </compilerArgs>-->
-<!--                </configuration>-->
-<!--            </plugin>-->
+            <!--            <plugin>-->
+            <!--                <groupId>com.google.errorprone</groupId>-->
+            <!--                <artifactId>error-prone-maven-plugin</artifactId>-->
+            <!--                <version>0.1</version>-->
+            <!--                <executions>-->
+            <!--                    <execution>-->
+            <!--                        <phase>compile</phase>-->
+            <!--                        <goals>-->
+            <!--                            <goal>check</goal>-->
+            <!--                        </goals>-->
+            <!--                    </execution>-->
+            <!--                </executions>-->
+            <!--                <configuration>-->
+            <!--                    <compilerArgs>-->
+            <!--                        <arg>-XDcompilePolicy=simple</arg>-->
+            <!--                    </compilerArgs>-->
+            <!--                </configuration>-->
+            <!--            </plugin>-->
 
         </plugins>
     </build>
