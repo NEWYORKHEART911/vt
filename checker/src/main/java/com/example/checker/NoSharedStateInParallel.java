@@ -37,6 +37,7 @@ public class NoSharedStateInParallel extends BugChecker
 
         Type lambdaType = ASTHelpers.getType(tree);
         Types types = state.getTypes();
+        //findDescriptorType handles intersection types
         types.findDescriptorType(lambdaType).getReturnType();
 
         return null;
