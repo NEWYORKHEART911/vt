@@ -9,9 +9,12 @@ import com.google.errorprone.bugpatterns.BugChecker.MethodInvocationTreeMatcher;
 import com.google.errorprone.bugpatterns.BugChecker.VariableTreeMatcher;
 import com.google.errorprone.matchers.Description;
 import com.google.errorprone.util.ASTHelpers;
+import com.sun.source.tree.LambdaExpressionTree;
 import com.sun.source.tree.MethodInvocationTree;
 import com.sun.source.tree.VariableTree;
 import com.sun.tools.javac.code.Symbol;
+import com.sun.tools.javac.code.Type;
+import com.sun.tools.javac.code.Types;
 
 @AutoService(BugChecker.class)
 @BugPattern(
@@ -20,11 +23,23 @@ import com.sun.tools.javac.code.Symbol;
         severity = SeverityLevel.ERROR
 )
 public class NoSharedStateInParallel extends BugChecker
-        implements VariableTreeMatcher, MethodInvocationTreeMatcher {
+        implements VariableTreeMatcher, MethodInvocationTreeMatcher,
+        BugChecker.LambdaExpressionTreeMatcher {
 
     @Override
     public Description matchMethodInvocation(MethodInvocationTree tree, VisitorState state) {
+
         return Description.NO_MATCH;
+    }
+
+    @Override
+    public Description matchLambdaExpression(LambdaExpressionTree tree, VisitorState state) {
+
+        Type lambdaType = ASTHelpers.getType(tree);
+        Types types = state.getTypes();
+        types.findDescriptorType(lambdaType).getReturnType();
+
+        return null;
     }
 
     @Override
@@ -42,4 +57,5 @@ public class NoSharedStateInParallel extends BugChecker
 
         return Description.NO_MATCH;
     }
+
 }
